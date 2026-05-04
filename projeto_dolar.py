@@ -1,10 +1,28 @@
-cotacao_atual_dolar = float(input("Digite a cotacao atual do dolar: "))
-cotacao_dolar_semana_passada = float(input("Digite a cotacao do dolar na semana passada: "))
-diferenca_cotacao = cotacao_atual_dolar - cotacao_dolar_semana_passada
+from fastapi import FastAPI, Query
+import requests
+import json
 
-if cotacao_atual_dolar > cotacao_dolar_semana_passada:
-    print(f"A cotação atual é R$ {cotacao_atual_dolar:.2f}" f" e a diferença em relação à semana passada é de R$ {diferenca_cotacao:.2f}")
-elif cotacao_dolar_semana_passada < cotacao_atual_dolar:
-    print(f"A cotação na semana passada era R$ {cotacao_dolar_semana_passada:.2f}" f" e a diferença em relação à cotação atual é de R$ {diferenca_cotacao:.2f}")
-else:
-    print("A cotação do dólar está estável em relação à semana passada.")
+app = FastAPI()
+
+@app.get("/cotacao-dolar")
+def obter_cotacao_dolar(pesquisa: float):
+    url = "https://economia.awesomeapi.com.br/json/daily/USD-BRL/30"
+    response = requests.get(url)
+    data = response.json()
+
+    for item in data:
+        date = item.get('create_date', item.get('timestamp', 'desconhecida'))
+        bid = item.get('bid')
+        print(f"Valor encontrado: {bid} na data: {date}")
+
+        try:
+            if bid is not None and float(bid) == pesquisa:
+                return {
+                    "data_encontrada": date,
+                    "valor_encontrado": f"O valor do dólar nessa data foi: {bid}"
+                }
+        except ValueError:
+            continue
+        
+    return {"ERRO": "Valor não encontrado na cotação do dólar."}
+        
