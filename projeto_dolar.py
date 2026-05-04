@@ -4,6 +4,10 @@ import json
 
 app = FastAPI()
 
+@app.get("/Bem-vindo")
+def bem_vindo():
+    return {"Início": "Bem-vindo à API de cotação do dólar!"}
+
 @app.get("/cotacao-dolar")
 def obter_cotacao_dolar(pesquisa: float):
     url = "https://economia.awesomeapi.com.br/json/daily/USD-BRL/30"
